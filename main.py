@@ -1,110 +1,113 @@
 import pygame
+import random
 
-
-from Jeu.Figure import Figure
 from Jeu.Joueur import Joueur
-from Jeu.Piece import Piece
-from Jeu.Terrain import Terrain
+from Jeu.Tetris import Tetris
+
+colors = [
+    (0,255,255),
+    (255,0,0),
+    (0,255,0),
+    (0,0,255),
+    (255,168,0),
+    (255,0,255),
+    (255,255,0),
+]
 
 pygame.init()
 
-colors = [
-    (0, 0, 0),
-    (120, 37, 220),
-    (100, 179, 179),
-    (80, 34, 22),
-    (80, 134, 22),
-    (180, 34, 22),
-    (180, 34, 122),
-]
-
-
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-GRAY = (128, 128, 128)
+NOIR = (0, 0, 0)
+BLANC = (255, 255, 255)
+GRIS = (128, 128, 128)
 
 size = (400, 500)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Tetris")
 
-
 done = False
 clock = pygame.time.Clock()
 fps = 25
-Piece = Piece()
-Joueur1 = Joueur()
-TerrainDeJeu = Terrain()
-FigurePiece = Figure(10,20)
-counter = 0
+PieceTetris = Tetris(20, 10)
+compteur = 0
 
 pressing_down = False
 
-while not done:
-    if Piece.figure is None:
-        Piece.new_figure()
-    counter += 1
-    if counter > 100000:
-        counter = 0
+print('Veuillez renseignes votre nom : ')
+nom = input()
+print(nom)
 
-    if counter % (fps // Piece.level // 2) == 0 or pressing_down:
-        if Piece.state == "start":
-            Piece.deplac_bas()
+while not done:
+    if PieceTetris.figure is None:
+        PieceTetris.new_figure()
+    compteur += 1
+    if compteur > 100000:
+        compteur = 0
+
+    if compteur % (fps // PieceTetris.level // 2) == 0 or pressing_down:
+        if PieceTetris.state == "start":
+            PieceTetris.go_down()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                Piece.rotation()
+                PieceTetris.rotate()
             if event.key == pygame.K_DOWN:
                 pressing_down = True
             if event.key == pygame.K_LEFT:
-                Piece.deplac_horiz(-1)
+                PieceTetris.go_side(-1)
             if event.key == pygame.K_RIGHT:
-                Piece.deplac_horiz(1)
+                PieceTetris.go_side(1)
             if event.key == pygame.K_SPACE:
-                Piece.descente_piece()
+                PieceTetris.go_space()
             if event.key == pygame.K_ESCAPE:
-                Piece.__init__()
+                PieceTetris.__init__(20, 10)
 
     if event.type == pygame.KEYUP:
             if event.key == pygame.K_DOWN:
                 pressing_down = False
 
-    screen.fill(WHITE)
+    screen.fill(BLANC)
 
-    for i in range(TerrainDeJeu.hauteur):
-        for j in range(TerrainDeJeu.longueur):
-            pygame.draw.rect(screen, GRAY, [TerrainDeJeu.hauteur + Piece.zoom * j, TerrainDeJeu.longueur + Piece.zoom * i, Piece.zoom, Piece.zoom], 1)
-            if TerrainDeJeu.field[i][j] > 0:
-                pygame.draw.rect(screen, colors[TerrainDeJeu.field[i][j]],
-                                 [TerrainDeJeu.hauteur + Piece.zoom * j + 1, TerrainDeJeu.longueur + Piece.zoom * i + 1, Piece.zoom - 2, Piece.zoom - 1])
+    for i in range(PieceTetris.hauteur):
+        for j in range(PieceTetris.longueur):
+            pygame.draw.rect(screen, NOIR, [PieceTetris.x + PieceTetris.zoom * j, PieceTetris.y + PieceTetris.zoom * i, PieceTetris.zoom, PieceTetris.zoom], 1)
+            if PieceTetris.field[i][j] > 0:
+                pygame.draw.rect(screen, colors[PieceTetris.field[i][j]],
+                                 [PieceTetris.x + PieceTetris.zoom * j + 1, PieceTetris.y + PieceTetris.zoom * i + 1, PieceTetris.zoom - 2, PieceTetris.zoom - 1])
 
-    if Piece.figure is not None:
+    if PieceTetris.figure is not None:
         for i in range(4):
             for j in range(4):
                 p = i * 4 + j
-                if p in Piece.figure.image():
-                    pygame.draw.rect(screen, colors[Piece.figure.color],
-                                     [TerrainDeJeu.hauteur + Piece.zoom * (j + Piece.figure.x) + 1,
-                                      TerrainDeJeu.longueur + Piece.zoom * (i + Piece.figure.y) + 1,
-                                      Piece.zoom - 2, Piece.zoom - 2])
+                if p in PieceTetris.figure.image():
+                    pygame.draw.rect(screen, colors[PieceTetris.figure.color],
+                                     [PieceTetris.x + PieceTetris.zoom * (j + PieceTetris.figure.x) + 1,
+                                      PieceTetris.y + PieceTetris.zoom * (i + PieceTetris.figure.y) + 1,
+                                      PieceTetris.zoom - 2, PieceTetris.zoom - 2])
 
     font = pygame.font.SysFont('Calibri', 25, True, False)
     font1 = pygame.font.SysFont('Calibri', 65, True, False)
-    text = font.render("Score: " + str(Joueur1.score), True, BLACK)
-    text_PieceDeJeu_over = font1.render("Game Over", True, (255, 125, 0))
+    font2 = pygame.font.SysFont('Calibri', 30, True, False)
+    font3 = pygame.font.SysFont('Calibri', 20, True, False)
+    text = font.render("Score: " + str(PieceTetris.Joueur1.score), True, NOIR)
+    text2 = font2.render("level: " + str(PieceTetris.grab), True, GRIS)
+    text3 = font3.render(str(nom),True,NOIR)
+    text_game_over = font1.render("Game Over", True, (255, 125, 0))
     text_game_over1 = font1.render("Press ESC", True, (255, 215, 0))
+    text_game_over2 = font1.render("Score final " + str(PieceTetris.Joueur1.score_max), True, GRIS)
 
-    screen.blit(text, [0, 0])
-    if Piece.state == "gameover":
-        screen.blit(text_game_over1, [20, 200])
+    screen.blit(text, [0, 100])
+    screen.blit(text2, [0, 50])
+    screen.blit(text3, [280,20])
+    if PieceTetris.state == "gameover":
+        screen.blit(text_game_over, [20, 200])
         screen.blit(text_game_over1, [25, 265])
+        screen.blit(text_game_over2, [25, 330])
 
     pygame.display.flip()
     clock.tick(fps)
 
 pygame.quit()
 
-if __name__ == "__main__":
-    pass

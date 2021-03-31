@@ -1,13 +1,13 @@
 import random
 
 colors = [
-    (0, 0, 0),
-    (120, 37, 179),
-    (100, 179, 179),
-    (80, 34, 22),
-    (80, 134, 22),
-    (180, 34, 22),
-    (180, 34, 122),
+    (0,255,255),
+    (255,0,0),
+    (0,255,0),
+    (0,0,255),
+    (255,168,0),
+    (255,0,255),
+    (255,255,0),
 ]
 
 class Figure:
@@ -34,5 +34,5 @@ class Figure:
     def image(self):
         return self.figures[self.type][self.rotation]
 
-    def rotation(self):
+    def rotate(self):
         self.rotation = (self.rotation + 1) % len(self.figures[self.type])
